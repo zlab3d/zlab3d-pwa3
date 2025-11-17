@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ZLab – Gestão de Laboratório de Prótese Dental</title>
+
+  <!-- PWA básico -->
+  <meta name="theme-color" content="#0b75ff" />
+  <meta name="description" content="ZLab – Sistema de gestão em PWA para laboratório de prótese dental: pedidos, pacientes, tarefas, clínicas e financeiro." />
+  <link rel="manifest" href='data:application/json,{"name":"ZLab","short_name":"ZLab","start_url":"./","display":"standalone","background_color":"#f5f7fb","theme_color":"#0b75ff"}'>
+
+  <style>
+    :root{
+      --primary:#0b75ff;
+      --primary-dark:#0758c4;
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#6b7280;
+      --radius-lg:18px;
+      --radius-md:12px;
+      --shadow:0 15px 35px rgba(15,23,42,.16);
+      --safe-bottom:env(safe-area-inset-bottom);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      padding-bottom:calc(64px + var(--safe-bottom));
+    }
+    a{text-decoration:none;color:inherit;}
+    button{font-family:inherit;cursor:pointer;border:none;}
+
+    .page{flex:1;display:flex;flex-direction:column;}
+
+    header{
+      position:sticky;top:0;z-index:20;
+      background:linear-gradient(135deg,#0b75ff,#119dff);
+      color:#fff;
+      padding:10px 16px 12px;
+      box-shadow:0 6px 18px rgba(15,23,42,.25);
+    }
+    .header-inner{
+      max-width:980px;margin:0 auto;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .logo{
+      display:flex;align-items:center;gap:8px;
+    }
+    .logo-mark{
+      width:32px;height:32px;border-radius:12px;
+      background:#fff1;border:1px solid #ffffff55;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:18px;
+    }
+    .logo-text{
+      font-weight:700;font-size:1rem;
+    }
+    .logo-sub{
+      font-size:.72rem;opacity:.85;
+    }
+    .header-cta button{
+      border-radius:999px;
+      padding:6px 14px;
+      font-size:.8rem;
+      background:#fff;
+      color:var(--primary-dark);
+      font-weight:600;
+    }
+    .header-lab-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0.9;
+      margin-left: 10px;
+    }
+
+    main{flex:1;padding:16px 0;}
+    .container{max-width:980px;margin:0 auto;padding:0 16px;}
+
+    section{display:none;}
+    section.active{display:block;}
+
+    /* HERO / DASHBOARD */
+    .hero-card{
+      background:var(--card);
+      border-radius:26px;
+      padding:18px 18px 20px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+      border:1px solid #d1e3ff;
+      background-image:linear-gradient(150deg,#0b75ff 0,#0b75ff 40%,#ffffff 40%,#ffffff 100%);
+      color:#fff;
+    }
+    @media(min-width:720px){
+      .hero-card{
+        display:grid;
+        grid-template-columns:1.2fr 1fr;
+        gap:18px;
+        background-image:linear-gradient(150deg,#0b75ff 0,#0b75ff 45%,#ffffff 45%,#ffffff 100%);
+      }
+    }
+    .hero-left h1{
+      font-size:1.8rem;
+      line-height:1.15;
+      margin-bottom:6px;
+    }
+    .hero-left h1 span{color:#fffb;}
+    .hero-left p{
+      font-size:.95rem;
+      opacity:.9;
+      margin-bottom:10px;
+    }
+    .hero-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:.72rem;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#ffffff22;
+      border:1px solid #ffffff55;
+      margin-bottom:8px;
+    }
+    .hero-actions{
+      display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;
+    }
+    .btn-primary{
+      background:#fff;
+      color:var(--primary-dark);
+      font-weight:600;
+      padding:8px 16px;
+      border-radius:999px;
+      font-size:.85rem;
+    }
+    .btn-outline-light{
+      background:transparent;
+      color:#fff;
+      border-radius:999px;
+      border:1px solid #ffffffcc;
+      padding:7px 16px;
+      font-size:.82rem;
+    }
+    .hero-metrics{
+      display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:.75rem;
+    }
+    .hero-metrics strong{display:block;font-size:1rem;}
+
+    .hero-right{
+      background:#f3f6ff;
+      border-radius:18px;
+      padding:10px 10px 12px;
+      margin-top:14px;
+    }
+    .hero-right-header{
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:.78rem;margin-bottom:6px;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:.7rem;
+    }
+    .pill-blue{background:#dbeafe;color:#1d4ed8;}
+    .pill-green{background:#dcfce7;color:#15803d;}
+    .hero-table{
+      background:#ffffff;
+      border-radius:12px;
+      padding:8px;
+      font-size:.75rem;
+      border:1px solid #d1d5db;
+    }
+    .hero-table-row{display:flex;justify-content:space-between;margin-bottom:4px;}
+    .hero-table-row:last-child{margin-bottom:0;}
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius-lg);
+      padding:14px 16px 16px;
+      box-shadow:var(--shadow);
+      border:1px solid #e2e8f0;
+      margin-bottom:14px;
+    }
+    .card-title{
+      font-size:.95rem;
+      font-weight:600;
+      margin-bottom:6px;
+    }
+    .card-sub{
+      font-size:.8rem;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    /* FORMULÁRIOS */
+    .form-group{margin-bottom:10px;}
+    .form-group label{
+      font-size:.8rem;
+      font-weight:600;
+      margin-bottom:2px;
+      display:block;
+    }
+    .form-group input,.form-group select,.form-group textarea{
+      width:100%;
+      border-radius:var(--radius-md);
+      border:1px solid #cbd5e1;
+      padding:7px 9px;
+      font-size:.85rem;
+      background:#f9fafb;
+    }
+    .form-group textarea{min-height:50px;resize:vertical;}
+    .form-row{display:flex;gap:8px;}
+    .form-row .form-group{flex:1;}
+
+    .btn-small{
+      font-size:.8rem;
+      padding:6px 10px;
+      border-radius:999px;
+      background:var(--primary);
+      color:#fff;
+      font-weight:600;
+    }
+    .btn-ghost{
+      background:transparent;
+      color:var(--primary);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:.75rem;
+      border:1px solid #cbd5e1;
+    }
+    .btn-danger {
+      background: #ef4444;
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: .85rem;
+    }
+
+    .list-empty{
+      font-size:.8rem;
+      color:var(--muted);
+      text-align:center;
+      padding:6px 0;
+    }
+    .pill-status{
+      border-radius:999px;
+      font-size:.7rem;
+      padding:2px 8px;
+      font-weight:600;
+    }
+    .pill-status.novo{background:#dbeafe;color:#1d4ed8;}
+    .pill-status.producao{background:#fef3c7;color:#92400e;}
+    .pill-status.pronto{background:#dcfce7;color:#166534;}
+    .pill-status.planejamento{background:#e0f2fe;color:#0369a1;} /* New status color */
+    .pill-status.prova{background:#fce7f3;color:#be185d;} /* New status color */
+
+    .list-item{
+      display:flex;justify-content:space-between;gap:8px;
+      padding:6px 0;
+      border-bottom:1px dashed #e2e8f0;
+      font-size:.8rem;
+    }
+    .list-item:last-child{border-bottom:none;}
+    .list-main{flex:1;}
+    .list-meta{font-size:.72rem;color:var(--muted);}
+
+    .summary-row{
+      display:flex;justify-content:space-between;
+      font-size:.8rem;margin-bottom:3px;
+    }
+
+    .badge-tag{
+      display:inline-flex;
+      padding:2px 7px;
+      border-radius:999px;
+      font-size:.7rem;
+      background:#e0f2fe;
+      color:#0369a1;
+    }
+
+    /* NAV INFERIOR */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;
+      height:calc(64px + var(--safe-bottom));
+      padding-bottom:var(--safe-bottom);
+      background:#ffffffee;
+      backdrop-filter:blur(12px);
+      border-top:1px solid #e2e8f0;
+      display:flex;
+      z-index:30;
+    }
+    .nav-item{
+      flex:1;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      font-size:.72rem;
+      color:var(--muted);
+    }
+    .nav-item span.icon{font-size:1.3rem;margin-bottom:1px;}
+    .nav-item.active{color:var(--primary);font-weight:600;}
+
+    @media(min-width:900px){
+      body{padding-bottom:0;}
+      .bottom-nav{display:none;}
+    }
+
+    .msg{
+      margin-top:6px;
+      font-size:.78rem;
+      padding:6px 8px;
+      border-radius:var(--radius-md);
+      display:none;
+    }
+    .msg.ok{background:#dcfce7;color:#166534;}
+    .msg.err{background:#fee2e2;color:#991b1b;}
+
+    /* Chat styles */
+    .chat-container {
+      background: #f8fafc;
+      border-radius: var(--radius-md);
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .chat-message {
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      border-radius: var(--radius-md);
+      max-width: 80%;
+      font-size: 0.8rem;
+      line-height: 1.3;
+    }
+    .chat-message.laboratorio {
+      background: var(--primary);
+      color: #fff;
+      margin-left: auto;
+      text-align: right;
+    }
+    .chat-message.clinica {
+      background: #e2e8f0;
+      color: var(--text);
+      margin-right: auto;
+      text-align: left;
+    }
+    .chat-message-meta {
+      font-size: 0.65rem;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+    .chat-input {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .chat-input input {
+      flex: 1;
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.85rem;
+    }
+    .chat-input button {
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Alertas */
+    .alertas-container {
+      margin-top: 14px;
+    }
+    .alerta {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(15,23,42,.05);
+    }
+    .alerta-icon {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    /* Login/User Management */
+    .login-card {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 24px;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .login-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      color: var(--primary-dark);
+    }
+    .login-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .login-card .form-group {
+      text-align: left;
+    }
+    .login-card .btn-primary {
+      width: 100%;
+      margin-top: 10px;
+    }
+    .login-card .btn-ghost {
+      width: 100%;
+      margin-top: 8px;
+    }
+    .user-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 0.9rem;
+    }
+    .user-list-item:last-child {
+      border-bottom: none;
+    }
+    .user-list-item button {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+    .user-list-item button.delete {
+      background: #ef4444;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-mark">Z</div>
+        <div>
+          <div class="logo-text">ZLab</div>
+          <div class="logo-sub" id="header-lab-name">Gestão de laboratório de prótese dental</div>
+        </div>
+      </div>
+      <div class="header-cta">
+        <button onclick="instalarPWA()">Instalar app</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <!-- LOGIN / SELEÇÃO DE LABORATÓRIO -->
+      <section id="sec-login" class="active">
+        <div class="login-card">
+          <h2>Bem-vindo ao ZLab!</h2>
+          <p>Selecione um laboratório para continuar ou cadastre um novo.</p>
+
+          <div id="lista-laboratorios">
+            <!-- Lista de laboratórios será renderizada aqui -->
+          </div>
+
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
+
+          <form id="form-novo-laboratorio">
+            <div class="form-group">
+              <label for="novo-lab-nome">Nome do Laboratório</label>
+              <input id="novo-lab-nome" type="text" placeholder="Ex: Laboratório ZLab 3D" required>
+            </div>
+            <div class="form-group">
+              <label for="novo-lab-email">E-mail (opcional)</label>
+              <input id="novo-lab-email" type="email" placeholder="contato@zlab.com">
+            </div>
+            <button type="submit" class="btn-primary">Cadastrar Novo Laboratório</button>
+            <div id="msg-novo-laboratorio" class="msg"></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- DASHBOARD / INÍCIO -->
+      <section id="sec-home">
+        <div class="hero-card">
+          <div class="hero-left">
+            <div class="hero-badge">
+              <span>⚙️ Sistema de gestão</span>
+              <span style="background:#fff;color:var(--primary-dark);padding:2px 7px;border-radius:999px;">PWA, sem servidor</span>
+            </div>
+            <h1>A melhor versão do seu laboratório <span>começa aqui</span>.</h1>
+            <p>Pedidos, etapas de produção, tarefas, comunicação com clínicas e financeiro em um único app web instalável.</p>
+            <div class="hero-actions">
+              <button class="btn-primary" onclick="showSection('pedidos')">Registrar novo pedido</button>
+              <button class="btn-outline-light" onclick="showSection('tarefas')">Gerir tarefas</button>
+            </div>
+            <div class="hero-metrics">
+              <div><strong id="m-pedidos">0</strong> pedidos ativos</div>
+              <div><strong id="m-pacientes">0</strong> pacientes</div>
+              <div><strong id="m-tarefas">0</strong> tarefas ativas</div>
+              <div><strong id="m-valor">R$ 0,00</strong> em trabalhos</div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <div class="hero-right-header">
+              <span class="pill pill-blue" id="hero-pedido-id">Pedido ZL-0001</span>
+              <span class="pill pill-green" id="hero-pedido-status">Em produção</span>
+            </div>
+            <div class="hero-table">
+              <div class="hero-table-row">
+                <span>Paciente</span><strong id="hero-paciente">–</strong>
+              </div>
+              <div class="hero-table-row">
+                <span>Clínica</span><span id="hero-clinica">–</span>
+              </div>
+              <div class="hero-table-row">
+                <span>Trabalho</span><span id="hero-trabalho">–</span>
+              </div>
+              <div class="hero-table-row">
+                <span>Dentes</span><span id="hero-dentes">–</span>
+              </div>
+              <div class="hero-table-row">
+                <span>Etapa</span><span id="hero-etapa">–</span>
+              </div>
+              <div class="hero-table-row">
+                <span>Previsão</span><span id="hero-data">–</span>
+              </div>
+              <div class="hero-table-row">
+                <span>Valor</span><strong id="hero-valor">R$ 0,00</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Resumo do dia</div>
+          <div class="card-sub">Dados ficam apenas neste dispositivo (demonstração local).</div>
+          <div id="home-resumo"></div>
+        </div>
+
+        <div class="card alertas-container">
+          <div class="card-title">Alertas Urgentes</div>
+          <div id="alertas-urgentes"></div>
+        </div>
+      </section>
+
+      <!-- PEDIDOS -->
+      <section id="sec-pedidos">
+        <div class="card">
+          <div class="card-title">Pedidos</div>
+          <div class="card-sub">Cadastre os trabalhos de prótese do laboratório.</div>
+
+          <form id="form-pedido">
+            <div class="form-group">
+              <label>Paciente</label>
+              <input id="pedido-paciente" type="text" placeholder="Nome do paciente" required list="dl-pacientes">
+              <datalist id="dl-pacientes"></datalist>
+            </div>
+            <div class="form-group">
+              <label>Clínica</label>
+              <input id="pedido-clinica" type="text" placeholder="Nome da clínica" required list="dl-clinicas">
+              <datalist id="dl-clinicas"></datalist>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tipo de trabalho</label>
+                <input id="pedido-trabalho" type="text" placeholder="Ex.: Coroa zirconia 3D" required list="dl-trabalhos">
+                <datalist id="dl-trabalhos"></datalist>
+              </div>
+              <div class="form-group">
+                <label>Arcada</label>
+                <select id="pedido-arcada">
+                  <option value="superior">Superior</option>
+                  <option value="inferior">Inferior</option>
+                  <option value="ambas">Ambas</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Dentes envolvidos</label>
+              <input id="pedido-dentes" type="text" placeholder="Ex.: 11, 12, 21, 22">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Material</label>
+                <input id="pedido-material" type="text" placeholder="Ex.: Zircônia, Metalocerâmica" list="dl-materiais">
+                <datalist id="dl-materiais"></datalist>
+              </div>
+              <div class="form-group">
+                <label>Cor (Vita)</label>
+                <input id="pedido-cor" type="text" placeholder="Ex.: A2, A3" list="dl-cores">
+                <datalist id="dl-cores"></datalist>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Técnico Responsável</label>
+                <input id="pedido-tecnico" type="text" placeholder="Nome do técnico" list="dl-tecnicos">
+                <datalist id="dl-tecnicos"></datalist>
+              </div>
+              <div class="form-group">
+                <label>Previsão de entrega</label>
+                <input id="pedido-data" type="date">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Status</label>
+                <select id="pedido-status">
+                  <option value="novo">Novo</option>
+                  <option value="producao">Em produção</option>
+                  <option value="pronto">Pronto</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Etapa atual</label>
+                <select id="pedido-etapa">
+                  <option value="planejamento">Planejamento</option>
+                  <option value="enceracao">Enceração</option>
+                  <option value="prova">Prova</option>
+                  <option value="glaze">Glaze</option>
+                  <option value="entrega">Entrega</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Valor (R$)</label>
+              <input id="pedido-valor" type="number" min="0" step="0.01" placeholder="0,00">
+            </div>
+            <div class="form-group">
+              <label>Observações</label>
+              <textarea id="pedido-obs" placeholder="Instruções especiais, contatos, etc."></textarea>
+            </div>
+            <button type="submit" class="btn-small">Salvar pedido</button>
+            <button type="button" class="btn-ghost" onclick="criarPedidoDemo()">Adicionar exemplo</button>
+            <div id="msg-pedido" class="msg"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Lista de pedidos</div>
+          <div id="lista-pedidos"></div>
+        </div>
+      </section>
+
+      <!-- DETALHES DO PEDIDO -->
+      <section id="sec-pedido-detalhes">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <button class="btn-ghost" onclick="showSection('pedidos')" style="padding: 6px 12px;">
+              &larr; Voltar aos Pedidos
+            </button>
+            <div class="card-title" style="margin-bottom:0;">Detalhes do Pedido</div>
+          </div>
+          <div id="pedido-detalhes-container">
+            <!-- Conteúdo dos detalhes do pedido e chat será renderizado aqui -->
+          </div>
+        </div>
+      </section>
+
+      <!-- PACIENTES -->
+      <section id="sec-pacientes">
+        <div class="card">
+          <div class="card-title">Pacientes</div>
+          <div class="card-sub">Registre os pacientes vinculados aos pedidos.</div>
+
+          <form id="form-paciente">
+            <div class="form-group">
+              <label>Nome do paciente</label>
+              <input id="pac-nome" type="text" required>
+            </div>
+            <div class="form-group">
+              <label>Clínica</label>
+              <input id="pac-clinica" type="text" placeholder="Clínica de referência">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Data de nascimento</label>
+                <input id="pac-data" type="date">
+              </div>
+              <div class="form-group">
+                <label>Contato</label>
+                <input id="pac-contato" type="text" placeholder="WhatsApp, telefone, etc.">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Observações</label>
+              <textarea id="pac-obs" placeholder="Anotações clínicas relevantes."></textarea>
+            </div>
+            <button type="submit" class="btn-small">Adicionar paciente</button>
+            <div id="msg-paciente" class="msg"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Lista de pacientes</div>
+          <div id="lista-pacientes"></div>
+        </div>
+      </section>
+
+      <!-- TAREFAS -->
+      <section id="sec-tarefas">
+        <div class="card">
+          <div class="card-title">Tarefas</div>
+          <div class="card-sub">Elimine os papéis de lembrete. Registre follow-ups com clínicas e pacientes.</div>
+
+          <form id="form-tarefa">
+            <div class="form-group">
+              <label>Título da tarefa</label>
+              <input id="tar-titulo" type="text" placeholder="Ex.: Ligar para a Clínica Horizonte" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Vincular a pedido (opcional)</label>
+                <input id="tar-pedido" type="text" placeholder="Ex.: ZL-0103">
+              </div>
+              <div class="form-group">
+                <label>Data do lembrete</label>
+                <input id="tar-data" type="date">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Prioridade</label>
+                <select id="tar-prioridade">
+                  <option>Normal</option>
+                  <option>Alta</option>
+                  <option>Baixa</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="tar-status">
+                  <option>Pendente</option>
+                  <option>Em andamento</option>
+                  <option>Concluída</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Descrição</label>
+              <textarea id="tar-desc" placeholder="Descreva o que precisa ser feito."></textarea>
+            </div>
+            <button type="submit" class="btn-small">Salvar tarefa</button>
+            <div id="msg-tarefa" class="msg"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Lista de tarefas</div>
+          <div id="lista-tarefas"></div>
+        </div>
+      </section>
+
+      <!-- CLÍNICAS -->
+      <section id="sec-clinicas">
+        <div class="card">
+          <div class="card-title">Clínicas</div>
+          <div class="card-sub">Cadastre as clínicas que enviam trabalhos para o seu laboratório.</div>
+
+          <form id="form-clinica">
+            <div class="form-group">
+              <label>Nome da clínica</label>
+              <input id="cli-nome" type="text" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Responsável</label>
+                <input id="cli-resp" type="text">
+              </div>
+              <div class="form-group">
+                <label>Contato</label>
+                <input id="cli-contato" type="text" placeholder="WhatsApp, telefone, e-mail">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Observações</label>
+              <textarea id="cli-obs" placeholder="Condições comerciais, particularidades da clínica, etc."></textarea>
+            </div>
+            <button type="submit" class="btn-small">Salvar clínica</button>
+            <div id="msg-clinica" class="msg"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Lista de clínicas</div>
+          <div id="lista-clinicas"></div>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO -->
+      <section id="sec-financeiro">
+        <div class="card">
+          <div class="card-title">Financeiro</div>
+          <div class="card-sub">Resumo financeiro baseado nos pedidos cadastrados (demonstração local).</div>
+
+          <div id="fin-resumo" style="margin-bottom:10px;"></div>
+
+          <div class="card-sub" style="margin-top:4px;">Lançamentos (gerados a partir dos pedidos):</div>
+          <div id="lista-financeiro"></div>
+        </div>
+      </section>
+
+      <!-- CONFIG / CONTA -->
+      <section id="sec-config">
+        <div class="card">
+          <div class="card-title">Laboratório Ativo</div>
+          <div class="card-sub">
+            Informações do laboratório atualmente em uso.
+          </div>
+
+          <form id="form-usuario">
+            <div class="form-group">
+              <label>Nome do laboratório / responsável</label>
+              <input id="user-nome" type="text" placeholder="Laboratório ZLab 3D">
+            </div>
+            <div class="form-group">
+              <label>E-mail (local)</label>
+              <input id="user-email" type="email" placeholder="contato@zlab.com">
+            </div>
+            <button type="submit" class="btn-small">Salvar dados do laboratório</button>
+            <div id="msg-user" class="msg"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Gerenciar Laboratórios</div>
+          <p class="card-sub">Alterne entre laboratórios ou crie um novo perfil neste dispositivo.</p>
+          <button class="btn-primary" onclick="showSection('login')">Trocar de Laboratório</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Manutenção</div>
+          <p class="card-sub">Remover todos os dados do <strong>laboratório atual</strong> deste dispositivo.</p>
+          <button class="btn-danger" onclick="limparDadosLaboratorioAtual()">Limpar dados do laboratório atual</button>
+          <p class="card-sub" style="margin-top:10px;">Remover todos os dados de <strong>todos os laboratórios</strong> deste dispositivo.</p>
+          <button class="btn-danger" onclick="limparTudo()">Limpar TUDO (reset total)</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- NAV INFERIOR -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" data-target="home" onclick="showSection('home')">
+      <span class="icon">🏠</span>
+      <span>Início</span>
+    </div>
+    <div class="nav-item" data-target="pedidos" onclick="showSection('pedidos')">
+      <span class="icon">📄</span>
+      <span>Pedidos</span>
+    </div>
+    <div class="nav-item" data-target="pacientes" onclick="showSection('pacientes')">
+      <span class="icon">🧑‍⚕️</span>
+      <span>Pacientes</span>
+    </div>
+    <div class="nav-item" data-target="tarefas" onclick="showSection('tarefas')">
+      <span class="icon">✅</span>
+      <span>Tarefas</span>
+    </div>
+    <div class="nav-item" data-target="clinicas" onclick="showSection('clinicas')">
+      <span class="icon">🏥</span>
+      <span>Clínicas</span>
+    </div>
+    <div class="nav-item" data-target="financeiro" onclick="showSection('financeiro')">
+      <span class="icon">💰</span>
+      <span>Financeiro</span>
+    </div>
+    <div class="nav-item" data-target="config" onclick="showSection('config')">
+      <span class="icon">⚙️</span>
+      <span>Config</span>
+    </div>
+  </nav>
+</div>
+
+<script>
+  // ---------- CHAVES LOCALSTORAGE ----------
+  const K_ALL_USERS = 'zlab_all_users'; // Stores all local user profiles
+  const K_ACTIVE_USER_ID = 'zlab_active_user_id'; // Stores the ID of the currently active user
+
+  // Chaves para dados específicos do laboratório ativo
+  const K_PEDIDOS   = 'zlab_pedidos';
+  const K_TAREFAS   = 'zlab_tarefas';
+  const K_CLINICAS  = 'zlab_clinicas';
+  const K_PACIENTES = 'zlab_pacientes';
+  const K_CHATS     = 'zlab_chats';  // chat por pedido
+  const K_USER_PROFILE = 'zlab_user'; // Specific profile data for the active user
+
+  // Listas "inteligentes" (sugestões) por laboratório
+  const K_UNIQUE_PACIENTES = 'zlab_unique_pacientes';
+  const K_UNIQUE_CLINICAS  = 'zlab_unique_clinicas';
+  const K_UNIQUE_TRABALHOS = 'zlab_unique_trabalhos';
+  const K_UNIQUE_MATERIAIS = 'zlab_unique_materiais';
+  const K_UNIQUE_CORES     = 'zlab_unique_cores';
+  const K_UNIQUE_TECNICOS  = 'zlab_unique_tecnicos';
+
+
+  // Helper to get prefixed keys for current user
+  function getUserKey(baseKey) {
+    const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+    return activeUserId ? `${baseKey}_${activeUserId}` : baseKey; // Fallback if no user is active (shouldn't happen in main app flow)
+  }
+
+  function load(baseKey, def) {
+    try {
+      const key = getUserKey(baseKey);
+      const v = localStorage.getItem(key);
+      return v ? JSON.parse(v) : def;
+    } catch (e) {
+      console.error(`Error loading key ${baseKey}:`, e);
+      return def;
+    }
+  }
+
+  function save(baseKey, val) {
+    try {
+      const key = getUserKey(baseKey);
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) {
+      console.error(`Error saving key ${baseKey}:`, e);
+    }
+  }
+
+  // ---------- LISTAS INTELIGENTES (AUTOCOMPLETE) ----------
+  function addToUniqueList(baseKey, value) {
+    if (!value) return;
+    let list = load(baseKey, []);
+    // normaliza para evitar duplicatas com maiúscula/minúscula diferentes
+    const normalized = value.trim();
+    if (!normalized) return;
+    if (!list.includes(normalized)) {
+      list.push(normalized);
+      list.sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'})); // Ordena alfabeticamente
+      save(baseKey, list);
+    }
+  }
+
+  function renderDatalist(baseKey, datalistId) {
+    const list = load(baseKey, []);
+    const dl = document.getElementById(datalistId);
+    if (!dl) return;
+    dl.innerHTML = list.map(v => `<option value="${v}">`).join('');
+  }
+
+  // função para renderizar todos os datalists de uma vez
+  function renderAllSuggestionLists() {
+    renderDatalist(K_UNIQUE_PACIENTES, 'dl-pacientes');
+    renderDatalist(K_UNIQUE_CLINICAS,  'dl-clinicas');
+    renderDatalist(K_UNIQUE_TRABALHOS, 'dl-trabalhos');
+    renderDatalist(K_UNIQUE_MATERIAIS,'dl-materiais');
+    renderDatalist(K_UNIQUE_CORES,    'dl-cores');
+    renderDatalist(K_UNIQUE_TECNICOS, 'dl-tecnicos');
+  }
+
+  // ---------- NAVEGAÇÃO ENTRE SEÇÕES ----------
+  let currentSection = 'login'; // Default to login screen
+  function showSection(name) {
+    if (name !== 'login' && !localStorage.getItem(K_ACTIVE_USER_ID)) {
+      // If trying to access app sections without an active user, redirect to login
+      name = 'login';
+    }
+
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + name).classList.add('active');
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(i => {
+      i.classList.toggle('active', i.dataset.target === name);
+    });
+
+    // Hide bottom nav on login screen or pedido-detalhes
+    document.querySelector('.bottom-nav').style.display = (name === 'login' || name === 'pedido-detalhes') ? 'none' : 'flex';
+    document.querySelector('header').style.display = (name === 'login') ? 'none' : 'flex';
+    document.body.style.paddingBottom = (name === 'login' || name === 'pedido-detalhes') ? '0' : 'calc(64px + var(--safe-bottom))';
+
+
+    currentSection = name; // Update current section tracker
+
+    if (name === 'home') renderDashboard();
+    if (name === 'pedidos') { renderPedidos(); renderAllSuggestionLists(); } // Render suggestions on pedidos section
+    if (name === 'pacientes') renderPacientes(); // Call render for patients
+    if (name === 'tarefas') renderTarefas();
+    if (name === 'clinicas') renderClinicas();
+    if (name === 'financeiro') renderFinanceiro();
+    if (name === 'config') renderUserConfig(); // Renamed to avoid conflict with general user logic
+    if (name === 'login') renderLaboratorios();
+  }
+
+  // ---------- UTILITÁRIO DE MENSAGEM ----------
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+    el.style.display = 'block';
+    setTimeout(() => {
+      el.style.display = 'none';
+    }, 2500);
+  }
+
+  // ---------- USER / LABORATORY MANAGEMENT ----------
+  const K_LAB_USERS = 'zlab_lab_users'; // Stores all local laboratory profiles
+
+  function loadAllUsers() {
+    try {
+      const v = localStorage.getItem(K_LAB_USERS);
+      return v ? JSON.parse(v) : [];
+    } catch (e) {
+      console.error("Error loading all users:", e);
+      return [];
+    }
+  }
+
+  function saveAllUsers(users) {
+    try {
+      localStorage.setItem(K_LAB_USERS, JSON.stringify(users));
+    } catch (e) {
+      console.error("Error saving all users:", e);
+    }
+  }
+
+  function setActiveUser(userId) {
+    localStorage.setItem(K_ACTIVE_USER_ID, userId);
+    const users = loadAllUsers();
+    const activeUser = users.find(u => u.id === userId);
+    document.getElementById('header-lab-name').textContent = activeUser ? activeUser.nome : 'Gestão de laboratório de prótese dental';
+    renderAllSuggestionLists(); // Load suggestions for the new active user
+    showSection('home'); // Redirect to home after login
+  }
+
+  function renderLaboratorios() {
+    const users = loadAllUsers();
+    const el = document.getElementById('lista-laboratorios');
+    const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+
+    if (!users.length) {
+      el.innerHTML = '<div class="list-empty">Nenhum laboratório cadastrado.</div>';
+      return;
+    }
+
+    el.innerHTML = users.map(u => `
+      <div class="user-list-item">
+        <div>
+          <strong>${u.nome}</strong>
+          ${u.email ? `<div class="list-meta">${u.email}</div>` : ''}
+        </div>
+        <div>
+          ${u.id === activeUserId ? '<span class="badge-tag" style="margin-right: 8px;">Ativo</span>' : ''}
+          <button onclick="setActiveUser('${u.id}')">Entrar</button>
+          <button class="delete" onclick="confirmAndDeleteUser('${u.id}', '${u.nome}')">Excluir</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function confirmAndDeleteUser(userId, userName) {
+    if (confirm(`Tem certeza que deseja excluir o laboratório "${userName}" e TODOS os seus dados? Esta ação é irreversível.`)) {
+      deleteUser(userId);
+    }
+  }
+
+  function deleteUser(userId) {
+    let users = loadAllUsers();
+    users = users.filter(u => u.id !== userId);
+    saveAllUsers(users);
+
+    // Remove all data associated with this user ID
+    removeUserSpecificData(userId);
+
+    // If the deleted user was the active one, clear active user and show login
+    if (localStorage.getItem(K_ACTIVE_USER_ID) === userId) {
+      localStorage.removeItem(K_ACTIVE_USER_ID);
+      showSection('login');
+    } else {
+      renderLaboratorios();
+    }
+    showMsg('msg-novo-laboratorio', 'Laboratório e seus dados excluídos com sucesso.', 'ok');
+  }
+
+  const formNovoLaboratorio = document.getElementById('form-novo-laboratorio');
+  formNovoLaboratorio.addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = document.getElementById('novo-lab-nome').value.trim();
+    const email = document.getElementById('novo-lab-email').value.trim();
+
+    if (!nome) {
+      showMsg('msg-novo-laboratorio', 'O nome do laboratório é obrigatório.', 'err');
+      return;
+    }
+
+    const users = loadAllUsers();
+    const newUserId = 'user_' + Date.now();
+    users.push({
+      id: newUserId,
+      nome,
+      email
+    });
+    saveAllUsers(users);
+    formNovoLaboratorio.reset();
+    showMsg('msg-novo-laboratorio', 'Novo laboratório cadastrado. Faça login para acessá-lo.', 'ok');
+    renderLaboratorios();
+  });
+
+  // ---------- PEDIDOS ----------
+  const formPedido = document.getElementById('form-pedido');
+
+  formPedido.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const paciente = document.getElementById('pedido-paciente').value.trim();
+    const clinica = document.getElementById('pedido-clinica').value.trim();
+    const trabalho = document.getElementById('pedido-trabalho').value.trim();
+    const arcada = document.getElementById('pedido-arcada').value;
+    const dentes = document.getElementById('pedido-dentes').value.trim();
+    const material = document.getElementById('pedido-material').value.trim();
+    const cor = document.getElementById('pedido-cor').value.trim();
+    const tecnico = document.getElementById('pedido-tecnico').value.trim(); // Added tecnico
+    const data = document.getElementById('pedido-data').value;
+    const valor = parseFloat(document.getElementById('pedido-valor').value.replace(',', '.')) || 0;
+    const status = document.getElementById('pedido-status').value;
+    const etapa = document.getElementById('pedido-etapa').value;
+    const obs = document.getElementById('pedido-obs').value.trim();
+
+    if (!paciente || !clinica || !trabalho) {
+      showMsg('msg-pedido', 'Preencha paciente, clínica e tipo de trabalho.', 'err');
+      return;
+    }
+
+    const pedidos = load(K_PEDIDOS, []);
+    const novoCodigo = 'ZL-' + String(pedidos.length + 1).padStart(4, '0');
+
+    pedidos.unshift({
+      id: Date.now(),
+      codigo: novoCodigo,
+      paciente,
+      clinica,
+      trabalho,
+      arcada,
+      dentes,
+      material,
+      cor,
+      tecnico,
+      data,
+      valor,
+      status,
+      etapa,
+      obs
+    });
+
+    // Atualiza listas "inteligentes"
+    addToUniqueList(K_UNIQUE_PACIENTES, paciente);
+    addToUniqueList(K_UNIQUE_CLINICAS,  clinica);
+    addToUniqueList(K_UNIQUE_TRABALHOS, trabalho);
+    addToUniqueList(K_UNIQUE_MATERIAIS, material);
+    addToUniqueList(K_UNIQUE_CORES,     cor);
+    addToUniqueList(K_UNIQUE_TECNICOS,  tecnico);
+
+    save(K_PEDIDOS, pedidos);
+    formPedido.reset();
+    showMsg('msg-pedido', 'Pedido salvo localmente.', 'ok');
+    renderPedidos();
+    renderDashboard();
+    renderFinanceiro();
+    renderAllSuggestionLists(); // Atualiza as sugestões após salvar
+  });
+
+  // exemplo rápido
+  function criarPedidoDemo() {
+    const pedidos = load(K_PEDIDOS, []);
+    const novoCodigo = 'ZL-' + String(pedidos.length + 1).padStart(4, '0');
+    const demoPaciente = 'Tatiana Amorim';
+    const demoClinica = 'Clínica Horizonte 3D';
+    const demoTrabalho = 'Coroa zirconia 3D';
+    const demoMaterial = 'Zircônia';
+    const demoCor = 'A2';
+    const demoTecnico = 'Marcos Silva';
+
+    pedidos.unshift({
+      id: Date.now(),
+      codigo: novoCodigo,
+      paciente: demoPaciente,
+      clinica: demoClinica,
+      trabalho: demoTrabalho,
+      arcada: 'superior',
+      dentes: '11, 12, 21, 22',
+      material: demoMaterial,
+      cor: demoCor,
+      tecnico: demoTecnico,
+      data: '2025-03-21',
+      valor: 850,
+      status: 'producao',
+      etapa: 'enceracao',
+      obs: 'Paciente prefere acabamento mais claro.'
+    });
+
+    // Adiciona os valores da demo às listas de sugestões
+    addToUniqueList(K_UNIQUE_PACIENTES, demoPaciente);
+    addToUniqueList(K_UNIQUE_CLINICAS,  demoClinica);
+    addToUniqueList(K_UNIQUE_TRABALHOS, demoTrabalho);
+    addToUniqueList(K_UNIQUE_MATERIAIS, demoMaterial);
+    addToUniqueList(K_UNIQUE_CORES,     demoCor);
+    addToUniqueList(K_UNIQUE_TECNICOS,  demoTecnico);
+
+    save(K_PEDIDOS, pedidos);
+    renderPedidos();
+    renderDashboard();
+    renderFinanceiro();
+    renderAllSuggestionLists();
+  }
+
+  function statusLabel(p) {
+    if (p.status === 'novo') return 'Novo';
+    if (p.status === 'producao') return 'Em produção';
+    if (p.status === 'pronto') return 'Pronto';
+    return p.status;
+  }
+
+  function etapaLabel(p) {
+    const map = {
+      planejamento: 'Planejamento',
+      enceracao: 'Enceração',
+      prova: 'Prova',
+      glaze: 'Glaze',
+      entrega: 'Entrega'
+    };
+    return map[p.etapa] || p.etapa || '—';
+  }
+
+  function renderPedidos() {
+    const pedidos = load(K_PEDIDOS, []);
+    const el = document.getElementById('lista-pedidos');
+
+    if (!pedidos.length) {
+      el.innerHTML = '<div class="list-empty">Nenhum pedido cadastrado ainda.</div>';
+      return;
+    }
+
+    el.innerHTML = pedidos.map(p => `
+      <div class="list-item" onclick="abrirPedidoDetalhes(${p.id})" style="cursor:pointer;">
+        <div class="list-main">
+          <div><strong>${p.codigo}</strong> · ${p.trabalho}</div>
+          <div class="list-meta">
+            Paciente: ${p.paciente} · Clínica: ${p.clinica}
+          </div>
+          <div class="list-meta">
+            Arcada: ${p.arcada} · Dentes: ${p.dentes || '–'} · Técnico: ${p.tecnico || '—'}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div><span class="pill-status ${p.status}">
+            ${statusLabel(p)}
+          </span></div>
+          <div class="list-meta">Etapa: ${etapaLabel(p)}</div>
+          <div class="list-meta">Prev.: ${p.data || '—'}</div>
+          <div class="list-meta">R$ ${p.valor.toFixed(2)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- DETALHES DO PEDIDO (DADOS + CHAT) ----------
+  function abrirPedidoDetalhes(id) {
+    const pedidos = load(K_PEDIDOS, []);
+    const pedido = pedidos.find(p => p.id === id);
+    if (!pedido) return;
+
+    // preenche card de detalhes
+    const c = document.getElementById('pedido-detalhes-container');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div>
+          <div style="font-weight:600;font-size:.9rem;">${pedido.codigo} · ${pedido.trabalho}</div>
+          <div style="font-size:.78rem;color:var(--muted);">${pedido.clinica}</div>
+        </div>
+        <span class="pill-status ${pedido.status}">${statusLabel(pedido)}</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.1fr 1.1fr;gap:8px;font-size:.78rem;margin-bottom:10px;">
+        <div>
+          <div class="card-sub" style="margin:0 0 4px 0;">Dados do paciente</div>
+          <div>Paciente: <strong>${pedido.paciente}</strong></div>
+          <div>Arcada: ${pedido.arcada}</div>
+          <div>Dentes: ${pedido.dentes || '—'}</div>
+          <div>Cor: ${pedido.cor || '—'}</div>
+        </div>
+        <div>
+          <div class="card-sub" style="margin:0 0 4px 0;">Produção</div>
+          <div>Material: ${pedido.material || '—'}</div>
+          <div>Técnico: ${pedido.tecnico || '—'}</div>
+          <div>Etapa: ${etapaLabel(pedido)}</div>
+          <div>Previsão: ${pedido.data || '—'}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.8rem;margin-bottom:8px;">
+        <div>Status financeiro</div>
+        <div><strong>R$ ${pedido.valor.toFixed(2)}</strong></div>
+      </div>
+
+      <div class="card-sub" style="margin-top:4px;">Observações</div>
+      <div style="font-size:.78rem;margin-bottom:10px;">${pedido.obs || 'Nenhuma observação registrada.'}</div>
+
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:10px 0;">
+
+      <div class="card-sub" style="margin-top:0;">Chat do pedido (simulação)</div>
+      <div class="chat-container" id="chat-${pedido.id}"></div>
+      <div class="chat-input">
+        <input type="text" id="chat-input-${pedido.id}" placeholder="Enviar mensagem da clínica ou do laboratório...">
+        <button class="btn-small" onclick="enviarMensagemChat(${pedido.id}, 'laboratorio')">Enviar</button>
+      </div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:3px;">
+        Este chat é apenas local (não envia dados para a internet).
+      </div>
+
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:10px 0;">
+
+      <div class="card-sub" style="margin-top:0;">Etapas de produção</div>
+      <div style="font-size:.78rem;">
+        <div class="list-item" style="padding:4px 0;border-bottom:none;">
+          <div class="list-main">
+            <div><strong>Planejamento</strong></div>
+            <div class="list-meta">Arquivos recebidos, instruções definidas.</div>
+          </div>
+          <div class="list-meta">
+            ${pedido.etapa === 'planejamento' ? '<span class="pill-status planejamento">Atual</span>' : ''}
+          </div>
+        </div>
+        <div class="list-item" style="padding:4px 0;border-bottom:none;">
+          <div class="list-main">
+            <div><strong>Enceração</strong></div>
+            <div class="list-meta">Modelagem e enceramento digital ou analógico.</div>
+          </div>
+          <div class="list-meta">
+            ${pedido.etapa === 'enceracao' ? '<span class="pill-status producao">Atual</span>' : ''}
+          </div>
+        </div>
+        <div class="list-item" style="padding:4px 0;border-bottom:none;">
+          <div class="list-main">
+            <div><strong>Prova</strong></div>
+            <div class="list-meta">Prova em boca, ajustes.</div>
+          </div>
+          <div class="list-meta">
+            ${pedido.etapa === 'prova' ? '<span class="pill-status prova">Atual</span>' : ''}
+          </div>
+        </div>
+        <div class="list-item" style="padding:4px 0;border-bottom:none;">
+          <div class="list-main">
+            <div><strong>Glaze</strong></div>
+            <div class="list-meta">Acabamento final, glaze e caracterização.</div>
+          </div>
+          <div class="list-meta">
+            ${pedido.etapa === 'glaze' ? '<span class="pill-status producao">Atual</span>' : ''}
+          </div>
+        </div>
+        <div class="list-item" style="padding:4px 0;border-bottom:none;">
+          <div class="list-main">
+            <div><strong>Entrega</strong></div>
+            <div class="list-meta">Trabalho pronto para envio à clínica.</div>
+          </div>
+          <div class="list-meta">
+            ${pedido.etapa === 'entrega' ? '<span class="pill-status pronto">Atual</span>' : ''}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // renderiza mensagens existentes do chat
+    renderChat(pedido.id);
+
+    // abre a seção de detalhes
+    showSection('pedido-detalhes');
+  }
+
+  function getChatByPedidoId(pedidoId) {
+    const chats = load(K_CHATS, {});
+    return chats[pedidoId] || [];
+  }
+
+  function saveChatByPedidoId(pedidoId, messages) {
+    const chats = load(K_CHATS, {});
+    chats[pedidoId] = messages;
+    save(K_CHATS, chats);
+  }
+
+  function renderChat(pedidoId) {
+    const container = document.getElementById('chat-' + pedidoId);
+    if (!container) return;
+    const msgs = getChatByPedidoId(pedidoId);
+    if (!msgs.length) {
+      container.innerHTML = '<div style="font-size:.78rem;color:var(--muted);">Sem mensagens ainda.</div>';
+      return;
+    }
+    container.innerHTML = msgs.map(m => `
+      <div class="chat-message ${m.tipo}">
+        <div>${m.texto}</div>
+        <div class="chat-message-meta">${m.origem} · ${m.hora}</div>
+      </div>
+    `).join('');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function enviarMensagemChat(pedidoId, tipo) {
+    const input = document.getElementById('chat-input-' + pedidoId);
+    if (!input) return;
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    const now = new Date();
+    const hora = now.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const origem = tipo === 'laboratorio' ? 'Laboratório' : 'Clínica';
+
+    const msgs = getChatByPedidoId(pedidoId);
+    msgs.push({
+      texto,
+      tipo,
+      origem,
+      hora
+    });
+    saveChatByPedidoId(pedidoId, msgs);
+    input.value = '';
+    renderChat(pedidoId);
+  }
+
+  // ---------- PACIENTES ----------
+  const formPaciente = document.getElementById('form-paciente');
+
+  formPaciente.addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = document.getElementById('pac-nome').value.trim();
+    const clinica = document.getElementById('pac-clinica').value.trim();
+    const dataNascimento = document.getElementById('pac-data').value;
+    const contato = document.getElementById('pac-contato').value.trim();
+    const obs = document.getElementById('pac-obs').value.trim();
+
+    if (!nome) {
+      showMsg('msg-paciente', 'O nome do paciente é obrigatório.', 'err');
+      return;
+    }
+
+    const pacientes = load(K_PACIENTES, []);
+    pacientes.unshift({
+      id: Date.now(),
+      nome,
+      clinica,
+      dataNascimento,
+      contato,
+      obs
+    });
+    save(K_PACIENTES, pacientes);
+    formPaciente.reset();
+    showMsg('msg-paciente', 'Paciente salvo localmente.', 'ok');
+    renderPacientes();
+    renderDashboard(); // Update dashboard patient count
+    addToUniqueList(K_UNIQUE_PACIENTES, nome); // Adiciona à lista de sugestões
+    renderAllSuggestionLists();
+  });
+
+  function renderPacientes() {
+    const pacientes = load(K_PACIENTES, []);
+    const el = document.getElementById('lista-pacientes');
+    if (!pacientes.length) {
+      el.innerHTML = '<div class="list-empty">Nenhum paciente cadastrado.</div>';
+      return;
+    }
+    el.innerHTML = pacientes.map(p => `
+      <div class="list-item">
+        <div class="list-main">
+          <div><strong>${p.nome}</strong></div>
+          <div class="list-meta">Clínica: ${p.clinica || '—'}</div>
+          <div class="list-meta">Nasc.: ${p.dataNascimento || '—'} · Contato: ${p.contato || '—'}</div>
+        </div>
+        <div class="list-meta">${p.obs || ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- TAREFAS ----------
+  const formTarefa = document.getElementById('form-tarefa');
+
+  formTarefa.addEventListener('submit', e => {
+    e.preventDefault();
+    const titulo = document.getElementById('tar-titulo').value.trim();
+    const pedido = document.getElementById('tar-pedido').value.trim();
+    const data = document.getElementById('tar-data').value;
+    const prioridade = document.getElementById('tar-prioridade').value;
+    const status = document.getElementById('tar-status').value;
+    const desc = document.getElementById('tar-desc').value.trim();
+
+    if (!titulo) {
+      showMsg('msg-tarefa', 'Informe o título da tarefa.', 'err');
+      return;
+    }
+
+    const tarefas = load(K_TAREFAS, []);
+    tarefas.unshift({
+      id: Date.now(),
+      titulo,
+      pedido,
+      data,
+      prioridade,
+      status,
+      desc
+    });
+    save(K_TAREFAS, tarefas);
+    formTarefa.reset();
+    showMsg('msg-tarefa', 'Tarefa salva localmente.', 'ok');
+    renderTarefas();
+    renderDashboard();
+  });
+
+  function renderTarefas() {
+    const tarefas = load(K_TAREFAS, []);
+    const el = document.getElementById('lista-tarefas');
+    if (!tarefas.length) {
+      el.innerHTML = '<div class="list-empty">Nenhuma tarefa cadastrada.</div>';
+      return;
+    }
+    el.innerHTML = tarefas.map(t => `
+      <div class="list-item">
+        <div class="list-main">
+          <div><strong>${t.titulo}</strong></div>
+          <div class="list-meta">
+            Pedido: ${t.pedido || '—'} · Data: ${t.data || '—'} · Prioridade: ${t.prioridade}
+          </div>
+          <div class="list-meta">${t.desc || ''}</div>
+        </div>
+        <div class="list-meta">${t.status}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- CLÍNICAS ----------
+  const formClinica = document.getElementById('form-clinica');
+  formClinica.addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = document.getElementById('cli-nome').value.trim();
+    const resp = document.getElementById('cli-resp').value.trim();
+    const contato = document.getElementById('cli-contato').value.trim();
+    const obs = document.getElementById('cli-obs').value.trim();
+    if (!nome) {
+      showMsg('msg-clinica', 'Informe o nome da clínica.', 'err');
+      return;
+    }
+
+    const clinicas = load(K_CLINICAS, []);
+    clinicas.unshift({
+      id: Date.now(),
+      nome,
+      resp,
+      contato,
+      obs
+    });
+    save(K_CLINICAS, clinicas);
+    formClinica.reset();
+    showMsg('msg-clinica', 'Clínica salva localmente.', 'ok');
+    renderClinicas();
+    addToUniqueList(K_UNIQUE_CLINICAS, nome); // Adiciona à lista de sugestões
+    renderAllSuggestionLists();
+  });
+
+  function renderClinicas() {
+    const clinicas = load(K_CLINICAS, []);
+    const el = document.getElementById('lista-clinicas');
+    if (!clinicas.length) {
+      el.innerHTML = '<div class="list-empty">Nenhuma clínica cadastrada.</div>';
+      return;
+    }
+    el.innerHTML = clinicas.map(c => `
+      <div class="list-item">
+        <div class="list-main">
+          <div><strong>${c.nome}</strong></div>
+          <div class="list-meta">Responsável: ${c.resp || '–'}</div>
+          <div class="list-meta">${c.contato || ''}</div>
+        </div>
+        <div class="list-meta">${c.obs || ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- FINANCEIRO ----------
+  function renderFinanceiro() {
+    const pedidos = load(K_PEDIDOS, []);
+    const elResumo = document.getElementById('fin-resumo');
+    const elList = document.getElementById('lista-financeiro');
+
+    if (!pedidos.length) {
+      elResumo.innerHTML = '';
+      elList.innerHTML = '<div class="list-empty">Sem lançamentos. Cadastre pedidos para gerar financeiro.</div>';
+      return;
+    }
+
+    let total = 0;
+    pedidos.forEach(p => total += p.valor || 0);
+    const recebidos = pedidos.filter(p => p.status === 'pronto')
+      .reduce((s, p) => s + (p.valor || 0), 0);
+    const aReceber = total - recebidos;
+
+    elResumo.innerHTML = `
+      <div class="summary-row"><span>Total em pedidos</span><strong>R$ ${total.toFixed(2)}</strong></div>
+      <div class="summary-row"><span>Considerado recebido (pronto)</span><strong>R$ ${recebidos.toFixed(2)}</strong></div>
+      <div class="summary-row"><span>A receber</span><strong>R$ ${aReceber.toFixed(2)}</strong></div>
+    `;
+
+    elList.innerHTML = pedidos.map(p => `
+      <div class="list-item">
+        <div class="list-main">
+          <div><strong>${p.codigo}</strong> · ${p.trabalho}</div>
+          <div class="list-meta">${p.clinica}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="list-meta">R$ ${p.valor.toFixed(2)}</div>
+          <span class="pill-status ${p.status}">${statusLabel(p)}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- CONFIG / USER ----------
+  const formUser = document.getElementById('form-usuario');
+  formUser.addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = document.getElementById('user-nome').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+
+    // Update the active user's profile data
+    save(K_USER_PROFILE, {
+      nome,
+      email
+    });
+
+    // Also update the name in the K_LAB_USERS array
+    const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+    if (activeUserId) {
+      let allUsers = loadAllUsers();
+      const userIndex = allUsers.findIndex(u => u.id === activeUserId);
+      if (userIndex !== -1) {
+        allUsers[userIndex].nome = nome;
+        allUsers[userIndex].email = email;
+        saveAllUsers(allUsers);
+      }
+    }
+
+    showMsg('msg-user', 'Dados do laboratório salvos.', 'ok');
+    renderDashboard();
+    updateHeaderLabName();
+  });
+
+  function renderUserConfig() {
+    const u = load(K_USER_PROFILE, null);
+    if (!u) {
+      // If no specific profile data, try to get from all users list
+      const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+      const allUsers = loadAllUsers();
+      const activeUser = allUsers.find(user => user.id === activeUserId);
+      if (activeUser) {
+        document.getElementById('user-nome').value = activeUser.nome || '';
+        document.getElementById('user-email').value = activeUser.email || '';
+      } else {
+        document.getElementById('user-nome').value = '';
+        document.getElementById('user-email').value = '';
+      }
+      return;
+    }
+    document.getElementById('user-nome').value = u.nome || '';
+    document.getElementById('user-email').value = u.email || '';
+  }
+
+  function removeUserSpecificData(userId) {
+    const keysToRemove = [
+      K_PEDIDOS,
+      K_TAREFAS,
+      K_CLINICAS,
+      K_PACIENTES,
+      K_CHATS,
+      K_USER_PROFILE,
+      K_UNIQUE_PACIENTES,
+      K_UNIQUE_CLINICAS,
+      K_UNIQUE_TRABALHOS,
+      K_UNIQUE_MATERIAIS,
+      K_UNIQUE_CORES,
+      K_UNIQUE_TECNICOS
+    ];
+    keysToRemove.forEach(baseKey => {
+      localStorage.removeItem(`${baseKey}_${userId}`);
+    });
+  }
+
+  function limparDadosLaboratorioAtual() {
+    if (!confirm('Tem certeza que deseja apagar TODOS os dados do laboratório atual? Esta ação é irreversível.')) return;
+
+    const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+    if (activeUserId) {
+      removeUserSpecificData(activeUserId);
+      localStorage.removeItem(K_ACTIVE_USER_ID); // Clear active user
+      showMsg('msg-user', 'Todos os dados do laboratório atual foram removidos.', 'ok');
+      showSection('login'); // Go back to login screen
+    } else {
+      showMsg('msg-user', 'Nenhum laboratório ativo para limpar dados.', 'err');
+    }
+  }
+
+  function limparTudo() {
+    if (!confirm('Tem certeza que deseja apagar TODOS os dados de TODOS os laboratórios neste dispositivo? Esta ação é irreversível.')) return;
+
+    localStorage.clear(); // Clears everything
+    showMsg('msg-user', 'Todos os dados foram removidos. O aplicativo será reiniciado.', 'ok');
+    setTimeout(() => location.reload(), 1000); // Reload to reset app state
+  }
+
+  // ---------- DASHBOARD + ALERTAS ----------
+  function renderDashboard() {
+    const pedidos   = load(K_PEDIDOS,[]);
+    const tarefas   = load(K_TAREFAS,[]);
+    const pacientes = load(K_PACIENTES,[]); // Load patients
+    const u         = load(K_USER_PROFILE,null); // Active user's specific profile data
+    const totalFin  = pedidos.reduce((s,p)=>s+(p.valor||0),0);
+
+    document.getElementById('m-pedidos').textContent = pedidos.length;
+    document.getElementById('m-pacientes').textContent = pacientes.length; // Update patient count
+    document.getElementById('m-tarefas').textContent = tarefas.filter(t=>t.status!=='Concluída').length;
+    document.getElementById('m-valor').textContent   = 'R$ '+totalFin.toFixed(2);
+
+    const elResumo = document.getElementById('home-resumo');
+    const emProd   = pedidos.filter(p=>p.status==='producao').length;
+    const prontos  = pedidos.filter(p=>p.status==='pronto').length;
+
+    const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+    const allUsers = loadAllUsers();
+    const activeUser = allUsers.find(user => user.id === activeUserId);
+    const labName = activeUser ? (activeUser.nome || activeUser.email || 'Definir em Config') : 'Definir em Config';
+
+    // --- Insights simples ("inteligência" baseada em dados locais) ---
+    let trabalhoMaisFrequente = '—';
+    let clinicaTop = '—';
+    let ticketMedio = 0;
+
+    if (pedidos.length) {
+      // Frequência de tipos de trabalho
+      const freqTrabalhos = {};
+      const freqClinicas = {};
+      pedidos.forEach(p => {
+        if (p.trabalho) {
+          freqTrabalhos[p.trabalho] = (freqTrabalhos[p.trabalho] || 0) + 1;
+        }
+        if (p.clinica) {
+          freqClinicas[p.clinica] = (freqClinicas[p.clinica] || 0) + 1;
+        }
+      });
+
+      // encontra o trabalho mais frequente
+      let maxT = 0;
+      Object.entries(freqTrabalhos).forEach(([nome, qtd]) => {
+        if (qtd > maxT) {
+          maxT = qtd;
+          trabalhoMaisFrequente = `${nome} (${qtd})`;
+        }
+      });
+
+      // encontra a clínica com mais casos
+      let maxC = 0;
+      Object.entries(freqClinicas).forEach(([nome, qtd]) => {
+        if (qtd > maxC) {
+          maxC = qtd;
+          clinicaTop = `${nome} (${qtd})`;
+        }
+      });
+
+      // ticket médio
+      ticketMedio = totalFin / pedidos.length;
+    }
+
+    elResumo.innerHTML = `
+      <div class="summary-row">
+        <span>Laboratório / responsável</span>
+        <span>${labName}</span>
+      </div>
+      <div class="summary-row"><span>Pedidos em produção</span><span>${emProd}</span></div>
+      <div class="summary-row"><span>Pedidos prontos</span><span>${prontos}</span></div>
+      <div class="summary-row"><span>Tarefas ativas</span><span>${tarefas.filter(t=>t.status!=='Concluída').length}</span></div>
+      <div class="summary-row"><span>Clínicas cadastradas</span><span>${load(K_CLINICAS,[]).length}</span></div>
+      <div class="summary-row"><span>Trabalho mais recorrente</span><span>${trabalhoMaisFrequente}</span></div>
+      <div class="summary-row"><span>Clínica que mais envia casos</span><span>${clinicaTop}</span></div>
+      <div class="summary-row"><span>Ticket médio por pedido</span><span>R$ ${ticketMedio.toFixed(2)}</span></div>
+    `;
+
+    const destaque = pedidos[0]; // Always show the most recent order
+    document.getElementById('hero-pedido-id').textContent = destaque ? destaque.codigo + ' · ' + destaque.trabalho : 'Nenhum pedido';
+    document.getElementById('hero-paciente').textContent = destaque ? destaque.paciente : '–';
+    document.getElementById('hero-clinica').textContent = destaque ? destaque.clinica : '–';
+    document.getElementById('hero-trabalho').textContent = destaque ? destaque.trabalho : '–';
+    document.getElementById('hero-dentes').textContent = destaque ? (destaque.dentes || '–') : '–';
+    document.getElementById('hero-etapa').textContent = destaque ? etapaLabel(destaque) : '–'; // Populate etapa
+    document.getElementById('hero-data').textContent = destaque ? (destaque.data || '–') : '–';
+    document.getElementById('hero-valor').textContent = destaque ? 'R$ ' + (destaque.valor || 0).toFixed(2) : 'R$ 0,00';
+    document.getElementById('hero-pedido-status').textContent = destaque ? statusLabel(destaque) : '—';
+    document.getElementById('hero-pedido-status').className = `pill pill-green pill-status ${destaque ? destaque.status : ''}`;
+
+
+    // alertas urgentes (tarefas pendentes + pedidos perto da data)
+    const elAlertas = document.getElementById('alertas-urgentes');
+    let html = '';
+
+    const hoje = new Date().toISOString().slice(0, 10);
+    const tarefasPendentes = tarefas.filter(t=>t.status!=='Concluída');
+    tarefasPendentes.forEach(t=>{
+      // Adicionar lógica para destacar tarefas com data de lembrete vencida ou próxima
+      const dataLembrete = t.data;
+      let alertaTarefa = '';
+      if (dataLembrete && dataLembrete < hoje) {
+        alertaTarefa = ' (Vencida!)';
+      } else if (dataLembrete && dataLembrete === hoje) {
+        alertaTarefa = ' (Hoje!)';
+      }
+
+      html += `
+        <div class="alerta">
+          <div class="alerta-icon">!</div>
+          <div>
+            <div><strong>${t.titulo}</strong> (${t.prioridade})${alertaTarefa}</div>
+            <div class="list-meta">
+              Pedido: ${t.pedido || '—'} · Lembrete: ${t.data || '—'}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    const pedidosComData = pedidos.filter(p=>p.data && p.status!=='pronto');
+    pedidosComData.forEach(p=>{
+      if(p.data <= hoje){ // Já existe essa lógica para "entrega hoje ou vencida"
+        html += `
+          <div class="alerta">
+            <div class="alerta-icon">⏰</div>
+            <div>
+              <div><strong>Entrega hoje ou vencida</strong> · ${p.codigo}</div>
+              <div class="list-meta">
+                Paciente: ${p.paciente} · Clínica: ${p.clinica} · Prev.: ${p.data}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      // Podemos adicionar um alerta para pedidos com entrega nos próximos 3 dias, por exemplo
+      const dataPrevista = new Date(p.data);
+      const dataHoje = new Date(hoje);
+      const diffTime = Math.abs(dataPrevista - dataHoje);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (p.data > hoje && diffDays <= 3) { // Próximos 3 dias
+        html += `
+          <div class="alerta">
+            <div class="alerta-icon">🗓️</div>
+            <div>
+              <div><strong>Entrega próxima (${diffDays} dias)</strong> · ${p.codigo}</div>
+              <div class="list-meta">
+                Paciente: ${p.paciente} · Clínica: ${p.clinica} · Prev.: ${p.data}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    if(!html){
+      elAlertas.innerHTML = '<div class="list-empty">Nenhum alerta urgente no momento.</div>';
+    }else{
+      elAlertas.innerHTML = html;
+    }
+  }
+
+  function updateHeaderLabName() {
+    const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+    const allUsers = loadAllUsers();
+    const activeUser = allUsers.find(u => u.id === activeUserId);
+    document.getElementById('header-lab-name').textContent = activeUser ? activeUser.nome : 'Gestão de laboratório de prótese dental';
+  }
+
+  // ---------- PWA / SERVICE WORKER ----------
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  function instalarPWA() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(() => deferredPrompt = null);
+    } else {
+      alert('Para instalar, use o menu do navegador e escolha "Adicionar à tela inicial".');
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      const CACHE_NAME='zlab-pwa-v1';
+      self.addEventListener('install',e=>{
+        e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll([self.location.pathname])));
+        self.skipWaiting();
+      });
+      self.addEventListener('activate',e=>{
+        e.waitUntil(
+          caches.keys().then(keys=>Promise.all(
+            keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))
+          ))
+        );
+        self.clients.claim();
+      });
+      self.addEventListener('fetch',e=>{
+        e.respondWith(
+          caches.match(e.request).then(res=>res||fetch(e.request).catch(()=>res||new Response('<h1>Offline</h1>',{headers:{'Content-Type':'text/html'}})))
+        );
+      });
+    `;
+    const blob = new Blob([swCode], {
+      type: 'application/javascript'
+    });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(console.error);
+  }
+
+  // ---------- INICIALIZAÇÃO ----------
+  document.addEventListener('DOMContentLoaded', () => {
+    const activeUserId = localStorage.getItem(K_ACTIVE_USER_ID);
+    if (activeUserId) {
+      updateHeaderLabName();
+      renderAllSuggestionLists();   // Carrega as sugestões para o laboratório ativo
+      showSection('home'); // If user is already logged in, go to home
+    } else {
+      showSection('login'); // Otherwise, show login/user selection
+    }
+  });
+</script>
+</body>
+</html>
